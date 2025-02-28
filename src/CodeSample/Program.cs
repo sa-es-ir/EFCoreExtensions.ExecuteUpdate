@@ -1,9 +1,6 @@
-﻿// See https://aka.ms/new-console-template for more information
-using CodeSample;
+﻿using CodeSample;
 using CodeSample.Entities;
 using EFCoreExtensions;
-
-Console.WriteLine("Hello, World!");
 
 var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token;
 
@@ -12,7 +9,7 @@ var dbContext = new SampleDbContext();
 await dbContext
     .Students
     .Where(x => x.Id == 1)
-    .ExecuteUpdateAsync(nameof(Student.Name), "New Name");
+    .ExecuteUpdateAsync(nameof(Student.Name), "New Name", cancellationToken);
 
 var fieldsToUpdate = new Dictionary<string, object?>
 {
