@@ -1,1 +1,1 @@
-# EFCoreExtensions.ExecuteUpdate
+# An EF Core extension to have `ExecuteUpdate` dynamically
