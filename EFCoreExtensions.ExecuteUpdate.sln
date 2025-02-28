@@ -7,6 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{198F2645-C71
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EFCoreExtensions", "src\EFCoreExtensions\EFCoreExtensions.csproj", "{FEE39917-AB96-4D19-AAAB-8D20E5AD8F45}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeSample", "src\CodeSample\CodeSample.csproj", "{19EAF414-D165-4E19-86F5-9E02E88B6D27}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,11 +19,16 @@ Global
 		{FEE39917-AB96-4D19-AAAB-8D20E5AD8F45}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FEE39917-AB96-4D19-AAAB-8D20E5AD8F45}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FEE39917-AB96-4D19-AAAB-8D20E5AD8F45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19EAF414-D165-4E19-86F5-9E02E88B6D27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19EAF414-D165-4E19-86F5-9E02E88B6D27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19EAF414-D165-4E19-86F5-9E02E88B6D27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19EAF414-D165-4E19-86F5-9E02E88B6D27}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FEE39917-AB96-4D19-AAAB-8D20E5AD8F45} = {198F2645-C71F-46D9-8D25-4FCB262A8BF2}
+		{19EAF414-D165-4E19-86F5-9E02E88B6D27} = {198F2645-C71F-46D9-8D25-4FCB262A8BF2}
 	EndGlobalSection
 EndGlobal
