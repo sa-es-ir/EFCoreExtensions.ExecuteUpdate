@@ -10,6 +10,7 @@ public class SampleDbContext : DbContext
         var connectionString = Environment.GetEnvironmentVariable("EF_SAMPLE_CONNECTION_STRING");
 
         optionsBuilder.UseSqlServer(connectionString);
+        optionsBuilder.LogTo(Console.WriteLine);
     }
 
     public DbSet<Entities.Student> Students { get; set; } = null!;

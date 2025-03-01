@@ -5,6 +5,9 @@ using System.Reflection;
 
 namespace EFCoreExtensions;
 
+/// <summary>
+/// Mainly this code pulled from here: https://stackoverflow.com/questions/74476087/linq-expression-for-executeupdateasync
+/// </summary>
 public static class ExecutUpdateExtensions
 {
     static MethodInfo UpdateMethodInfo =
