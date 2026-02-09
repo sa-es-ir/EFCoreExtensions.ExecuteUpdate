@@ -3,9 +3,21 @@ using CodeSample.Entities;
 using EFCoreExtensions;
 using Microsoft.EntityFrameworkCore;
 
-var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(100)).Token;
+var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(30)).Token;
 
 var dbContext = new SampleDbContext();
+
+dbContext
+    .Students.Add(new Student
+    {
+        Name = "John Doe",
+        PhoneNumber = "9876543210",
+        Email = "something@example.com",
+        BirthDate = DateTime.Now,
+        Note = "Initial Note"
+    });
+
+await dbContext.SaveChangesAsync(cancellationToken);
 
 // EF Core Built-in ExecuteUpdateAsync
 await dbContext

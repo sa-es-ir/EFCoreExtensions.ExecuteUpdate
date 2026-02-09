@@ -1,14 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 using System.Reflection;
 
 namespace EFCoreExtensions;
 
 /// <summary>
+/// EF Core <=9 compatible extension for dynamic ExecuteUpdate operations.
+/// For EF Core 10+, see ExecuteUpdateExtensions.cs which uses the new Func-based API for simpler implementation.
 /// Mainly this code pulled from here: https://stackoverflow.com/questions/74476087/linq-expression-for-executeupdateasync
 /// </summary>
-public static class ExecutUpdateExtensions
+public static class ExecuteUpdateExtensionsUpToEFCore9
 {
     static MethodInfo UpdateMethodInfo =
         typeof(EntityFrameworkQueryableExtensions).GetMethod(nameof(EntityFrameworkQueryableExtensions.ExecuteUpdate))!;
