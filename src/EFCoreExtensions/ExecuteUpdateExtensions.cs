@@ -58,10 +58,17 @@ public static class ExecuteUpdateExtensions
         var propertyInfo = entityType.GetProperty(propertyName)
             ?? throw new InvalidOperationException($"Property '{propertyName}' not found on type '{entityType.Name}'");
 
-        // Find the SetProperty<TProperty> method  
+        // Find the SetProperty<TProperty> method that takes (Expression<Func<T, TProperty>>, TProperty)
+        // This is the overload where second parameter is the value directly, not an expression
         var setPropertyMethod = setPropertyCalls.GetType()
             .GetMethods()
-            .First(m => m.Name == "SetProperty" && m.IsGenericMethod && m.GetParameters().Length == 2);
+            .FirstOrDefault(m =>
+                m.Name == "SetProperty" &&
+                m.IsGenericMethod &&
+                m.GetParameters().Length == 2 &&
+                m.GetParameters()[0].ParameterType.Name == "Expression`1" &&
+                !m.GetParameters()[1].ParameterType.Name.StartsWith("Expression"))
+            ?? throw new InvalidOperationException("Could not find SetProperty<TProperty>(Expression<Func<T, TProperty>>, TProperty) method");
 
         var genericSetPropertyMethod = setPropertyMethod.MakeGenericMethod(propertyInfo.PropertyType);
 
@@ -70,32 +77,80 @@ public static class ExecuteUpdateExtensions
         var propertyAccess = Expression.Property(entityParam, propertyInfo);
         var propertyLambda = Expression.Lambda(propertyAccess, entityParam);
 
-        // Convert value to target type if needed
-        var convertedValue = ConvertValue(propertyInfo.PropertyType, value);
+        // Convert the value to the property type
+        var convertedValue = ConvertValueToPropertyType(value, propertyInfo.PropertyType);
 
-        // Create lambda for the value: e => convertedValue
-        var valueLambda = Expression.Lambda(
-            Expression.Constant(convertedValue, propertyInfo.PropertyType),
-            entityParam);
-
-        // Invoke: setPropertyCalls.SetProperty(e => e.Property, e => value)
-        // Note: In EF Core 10, SetProperty returns void (not the setPropertyCalls object)
-        genericSetPropertyMethod.Invoke(setPropertyCalls, [propertyLambda, valueLambda]);
+        // Invoke: setPropertyCalls.SetProperty(e => e.Property, value)
+        // Second parameter is the actual value, not an expression
+        genericSetPropertyMethod.Invoke(setPropertyCalls, [propertyLambda, convertedValue]);
     }
 
-    private static object? ConvertValue(Type targetType, object? value)
+    private static object? ConvertValueToPropertyType(object? value, Type targetType)
     {
         if (value == null)
-            return targetType.IsValueType && Nullable.GetUnderlyingType(targetType) == null
-                ? throw new InvalidOperationException($"Cannot assign null to non-nullable type {targetType.Name}")
-                : null;
+        {
+            if (targetType.IsValueType && Nullable.GetUnderlyingType(targetType) == null)
+                throw new InvalidOperationException($"Cannot assign null to non-nullable type {targetType.Name}");
+            
+            return null;
+        }
 
-        if (value.GetType() == targetType)
+        var valueType = value.GetType();
+        
+        // If already the correct type, return as-is
+        if (valueType == targetType)
             return value;
 
-        // Handle nullable types
-        var underlyingType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+        // Check if target is nullable value type
+        var underlyingType = Nullable.GetUnderlyingType(targetType);
+        
+        if (underlyingType != null)
+        {
+            // Target is Nullable<T>
+            // Convert to underlying type
+            object underlyingValue;
+            if (valueType == underlyingType)
+            {
+                underlyingValue = value;
+            }
+            else
+            {
+                try
+                {
+                    underlyingValue = Convert.ChangeType(value, underlyingType);
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException(
+                        $"Cannot convert value of type '{valueType.Name}' to '{underlyingType.Name}'", ex);
+                }
+            }
+            
+            // Create Nullable<T> using reflection to get a proper nullable instance
+            // Use the underlying type to create a method that returns Nullable<T>
+            var method = typeof(ExecuteUpdateExtensions)
+                .GetMethod(nameof(CreateNullableValue), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!
+                .MakeGenericMethod(underlyingType);
+            
+            return method.Invoke(null, [underlyingValue])!;
+        }
+        else
+        {
+            // Target is not nullable
+            try
+            {
+                return Convert.ChangeType(value, targetType);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(
+                    $"Cannot convert value of type '{valueType.Name}' to '{targetType.Name}'", ex);
+            }
+        }
+    }
 
-        return Convert.ChangeType(value, underlyingType);
+    private static T? CreateNullableValue<T>(T value) where T : struct
+    {
+        return new T?(value);
     }
 }
